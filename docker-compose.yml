@@ -1,0 +1,67 @@
+version: '3.6'
+services:
+  search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
+    environment:
+      cluster.name: fusionauth
+      bootstrap.memory_lock: "true"
+      discovery.type: single-node
+      ES_JAVA_OPTS: ${ES_JAVA_OPTS}
+    # Un-comment to access the search service directly
+    # ports:
+    #  - 9200:9200
+    #  - 9300:9300
+    networks:
+      - search
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+  fusionauth:
+    image: fusionauth/fusionauth-app:1.21.0
+    depends_on:
+      - search
+    environment:
+      DATABASE_URL: jdbc:postgresql://${POSTGRES_SERVER}:${POSTGRES_SERVER_PORT}/fusionauth
+      DATABASE_ROOT_USERNAME: ${POSTGRES_USER}
+      DATABASE_ROOT_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_USERNAME: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      FUSIONAUTH_APP_MEMORY: ${FUSIONAUTH_MEMORY}
+      FUSIONAUTH_APP_RUNTIME_MODE: ${FUSIONAUTH_APP_RUNTIME_MODE}
+      FUSIONAUTH_APP_URL: http://fusionauth:9011
+      SEARCH_SERVERS: http://search:9200
+      SEARCH_TYPE: elasticsearch
+    networks:
+     - search
+    restart: always
+    ports:
+      - 9011:9011
+    volumes:
+      - fa_config:/usr/local/fusionauth/config
+  caddy:
+      image: caddy:2.2.1
+      depends_on:
+      - fusionauth
+      restart: always
+      ports:
+      - "80:80"
+      - "443:443"
+      volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      networks:
+      - search      
+networks:
+  search:
+    driver: bridge
+
+volumes:
+  es_data:
+  fa_config:
+  caddy_data:
+  caddy_config:
