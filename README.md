@@ -24,6 +24,8 @@ ES_JAVA_OPTS=-Xms512m -Xmx512m
 
 FUSIONAUTH_APP_MEMORY=512M
 FUSIONAUTH_APP_RUNTIME_MODE=development
+
+CADDY_SITE_ADDRESS=:80
 ```
 
 ## Caddy Config
@@ -32,34 +34,41 @@ Caddy config is named ```Caddyfile``` and it is pretty straightforward.
 
 **Default configuration is**
 ```
-:80 {
+{$CADDY_SITE_ADDRESS} {
   reverse_proxy fusionauth:9011
 }
 ```
-which publishes FusionAuth web interface on the server's port 80.
+which publishes FusionAuth web interface on the server's port 80 which is defined in ```.env``` file above.
 
 Replace ```:80``` with your domain name to get automatic https via LetsEncrypt. Add your domain to serve only https (recommended)
 
-Don't forget to set your DNS first as Caddy will automatically validate and create certificates for you as soon as it started.
+Don't forget to set your DNS first as Caddy automatically validates and creates certificates for you as soon as it started.
 
-```
-db.myawesomedomain.com {
-  reverse_proxy fusionauth:9011
-}
-```
-
-Open up your server's 443 port to outside access before setting Caddyfile and rebuilding your docker-compose via your server's or hosting provider's firewall. By default, docker modifies iptables on linux directly https://docs.docker.com/network/iptables/
+Allow 443/tcp port to outside access before rebuilding your docker-compose. This might be tricky as docker modifies iptables on linux directly https://docs.docker.com/network/iptables/
 
 If you don't want to open your web interface to the public, you could always create a tunnel for it
 
 ```
-sudo ssh -N -L 443:127.0.0.1:443 root@server-public-ip -i ~/.ssh/id_rsa
+# sudo ssh -N -L 443:127.0.0.1:443 root@server-public-ip -i ~/.ssh/id_rsa
 ```
 
 and visit https://127.0.0.1 after your docker containers up.
 
-## Spin up the containers
+## Some Docker commands
 
 ```
-docker-compose up -d
+// Spin up the containers
+# docker-compose up -d
+
+// List active containers
+# docker ps
+
+// See the logs
+# docker logs your_container_name
+
+// Restart all in the compose file
+# docker-compose restart
+
+// Restart an individual container
+# docker restart your_container_name
 ```
