@@ -3,7 +3,7 @@
 FusionAuth solves Authentication, authorization, and user management for developers. Check their website here https://fusionauth.io
 
 This docker compose file uses these containers:
-- FusionAuth v1.21.0 uthentication, authorization, and user management server https://hub.docker.com/u/fusionauth
+- FusionAuth v1.21.0 authentication, authorization, and user management server https://hub.docker.com/u/fusionauth
 - ElasticSearch v7.9.3 for improved user search support on FusionAuth https://hub.docker.com/_/elasticsearch
 - Caddy v2.2.1 as reverse proxy server https://hub.docker.com/_/caddy
 
