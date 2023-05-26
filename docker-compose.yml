@@ -21,7 +21,7 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
   fusionauth:
-    image: fusionauth/fusionauth-app:1.21.0
+    image: fusionauth/fusionauth-app:1.45.2
     depends_on:
       - search
     environment:
@@ -38,15 +38,23 @@ services:
     networks:
      - search
     restart: always
-    ports:
-      - 9011:9011
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "20" 
     volumes:
       - fa_config:/usr/local/fusionauth/config
   caddy:
-      image: caddy:2.2.1
+      image: caddy:2.6.2
       depends_on:
       - fusionauth
       restart: always
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "100m"
+          max-file: "5"       
       environment:
       - "CADDY_SITE_ADDRESS=${CADDY_SITE_ADDRESS}"      
       ports:
